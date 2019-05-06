@@ -1031,8 +1031,31 @@ TilingManager.prototype._moveTile = function(direction) {
         // No tile to swap. Move to next screen in direction
         var targetScreen = util.nextScreenInDirection(this._currentScreen, desktop, direction);
         if (targetScreen != null) {
-            var targetRect = workspace.clientArea(KWin.ScreenArea, targetScreen, desktop);
+            var screenRect = workspace.clientArea(KWin.ScreenArea, targetScreen, desktop);
+            var targetRect = Qt.rect(0, 0, activeTile.rectangle.width, activeTile.rectangle.height);
+            switch (direction) {
+                case Direction.Left:
+                    targetRect.x = screenRect.x + screenRect.width - activeTile.rectangle.width;
+                    targetRect.y = activeTile.rectangle.y;
+                    break;
+                case Direction.Right:
+                    targetRect.x = screenRect.x;
+                    targetRect.y = activeTile.rectangle.y;
+                    break;
+                case Direction.Up:
+                    targetRect.x = activeTile.rectangle.x;
+                    targetRect.y = screenRect.y + screenRect.height - activeTile.rectangle.height;
+                    break;
+                case Direction.Down:
+                    targetRect.x = activeTile.rectangle.x;
+                    targetRect.y = screenRect.y;
+                    break;
+            }
+            var oldScreen = activeTile._currentScreen;
+            this._onTileMovingStarted(activeTile);
             client.geometry = targetRect;
+            activeTile._currentScreen = oldScreen;
+            this._onTileMovingEnded(activeTile);
         }
     }
 };
